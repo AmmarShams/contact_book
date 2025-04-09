@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash,session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = 'kasper'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
 
@@ -22,12 +23,15 @@ def index():
         name = request.form['name']
         number = request.form['number']
         address = request.form['address']
-
         new_contact = Contacts(name=name, number=number, address = address)
-
+        if not name or not number:
+            flash('Name and Number are mandatory', "error")
+            return redirect('/')
+        
         try:
             db.session.add(new_contact)
             db.session.commit()
+            flash('Contact Added Successfully', "success")
             return redirect('/')
         except:
             return 'There was a problem adding this contact'     
